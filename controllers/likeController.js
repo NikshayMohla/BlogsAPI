@@ -23,3 +23,22 @@ exports.likePost = async (req, res) => {
         })
     }
 }
+
+exports.unlikePost = async (req, res) => {
+    try {
+        const { post, like } = req.body
+        const deletedLike = await Like.findOneAndDelete({ post: post, _id: like })
+        const udpatedPost = await Post.findByIdAndUpdate(post, { $pull: { like: deletedLike._id } }, { new: true })
+            .populate("like")
+            .exec();
+
+        res.json({
+            post: udpatedPost,
+        });
+
+    } catch (e) {
+        return res.status(400).json({
+            error: `error ${e}`
+        })
+    }
+}
